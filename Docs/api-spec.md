@@ -1,6 +1,6 @@
 #API Reference
 ## ConfirmTagCreation
-Response: [ConfirmTagCreation](#ConfirmTagCreation) Request: [CreateTag](Gateway#CreateTag)
+Response: [ConfirmTagCreation](#ConfirmTagCreation) Request: [CreateTag](https://github.com/MSDO-ImageHost/Gateway/blob/main/docs/api-spec.md#CreateTag)
 Response:
 ```json
 {
@@ -12,7 +12,7 @@ Request:
 }
 ```
 ## ConfirmTagUpdate
-Response: [ConfirmTagUpdate](#ConfirmTagUpdate) Request: [UpdateTag](Gateway#UpdateTag)
+Response: [ConfirmTagUpdate](#ConfirmTagUpdate) Request: [UpdateTag](https://github.com/MSDO-ImageHost/Gateway/blob/main/docs/api-spec.md#UpdateTag)
 Response:
 ```json
 {
@@ -24,7 +24,7 @@ Request:
 }
 ```
 ## ConfirmTagDelete
-Response: [ConfirmTagDelete](#ConfirmTagDelete) Request: [DeleteTag](Gateway#DeleteTag)
+Response: [ConfirmTagDelete](#ConfirmTagDelete) Request: [DeleteTag](https://github.com/MSDO-ImageHost/Gateway/blob/main/docs/api-spec.md#DeleteTag)
 Response:
 ```json
 {
@@ -36,7 +36,7 @@ Request:
 }
 ```
 ## ReturnTag
-Response: [ReturnTag](#ReturnTag) Request: [RequestTag](Gateway#RequestTag)
+Response: [ReturnTag](#ReturnTag) Request: [RequestTag](https://github.com/MSDO-ImageHost/Gateway/blob/main/docs/api-spec.md#RequestTag)
 Response:
 ```json
 {
@@ -48,7 +48,7 @@ Request:
 }
 ```
 ## ReturnTagsForPost
-Response: [ReturnTagsForPost](#ReturnTagsForPost) Request: [RequestTagsForPost](Gateway#RequestTagsForPost)
+Response: [ReturnTagsForPost](#ReturnTagsForPost) Request: [RequestTagsForPost](https://github.com/MSDO-ImageHost/Gateway/blob/main/docs/api-spec.md#RequestTagsForPost)
 Response:
 ```json
 {
