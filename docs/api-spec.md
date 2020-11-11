@@ -27,8 +27,8 @@ Request: [UpdateTag](GatewayLink#UpdateTag)
 ```json
 {
   "Tag_ID": "<TAG_ID>",
-  "Tag_name": "<New_Tag-name>" OR NULL
-  "Tag_desc": "<New_Tag-desc>" Or NULL
+  "Tag_name": "<New_Tag-name> OR NULL",
+  "Tag_desc": "<New_Tag-desc> OR NULL" 
 }
 ```
 ## ConfirmTagDelete
