@@ -1,6 +1,6 @@
 #API Reference
 ## ConfirmTagCreation
-Response: [ConfirmTagCreation](This) Request: [CreateTag](Gateway)
+Response: [ConfirmTagCreation](#ConfirmTagCreation) Request: [CreateTag](Gateway)
 Response:
 ```json
 {
@@ -12,7 +12,7 @@ Request:
 }
 ```
 ## ConfirmTagUpdate
-Response: [ConfirmTagUpdate](This) Request: [UpdateTag](Gateway)
+Response: [ConfirmTagUpdate](#ConfirmTagUpdate) Request: [UpdateTag](Gateway)
 Response:
 ```json
 {
@@ -24,7 +24,7 @@ Request:
 }
 ```
 ## ConfirmTagDelete
-Response: [ConfirmTagDelete](This) Request: [DeleteTag](Gateway)
+Response: [ConfirmTagDelete](#ConfirmTagDelete) Request: [DeleteTag](Gateway)
 Response:
 ```json
 {
@@ -36,7 +36,7 @@ Request:
 }
 ```
 ## ReturnTag
-Response: [ReturnTag]() Request: [RequestTag](Gateway)
+Response: [ReturnTag](#ReturnTag) Request: [RequestTag](Gateway)
 Response:
 ```json
 {
@@ -48,7 +48,7 @@ Request:
 }
 ```
 ## ReturnTagsForPost
-Response: [ReturnTagsForPost]() Request: [RequestTagsForPost](Gateway)
+Response: [ReturnTagsForPost](#ReturnTagsForPost) Request: [RequestTagsForPost](Gateway)
 Response:
 ```json
 {
