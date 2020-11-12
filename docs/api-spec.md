@@ -7,14 +7,7 @@ Response: [ConfirmTagCreation](TagsLink#ConfirmTagCreation)
   "Create_status": "True/False"
 }
 ```
-Request: [CreateTag](GatewayLink#CreateTag)
-```json
-{
-  "Author_ID": "<User_ID>",
-  "Tag_Name": "<Tag name>",
-  "Tag_Desc": "<Tag desc>",
-}
-```
+Request: [Gateway](GatewayLink)/[GatewayCreateTag](GatewayLink#CreateTag)
 ## ConfirmTagUpdate
 Response: [ConfirmTagUpdate](TagsLink#ConfirmTagUpdate) 
 ```json
@@ -32,27 +25,27 @@ Request: [UpdateTag](GatewayLink#UpdateTag)
 }
 ```
 ## ConfirmTagDelete
-Response: [ConfirmTagDelete](TagsLink#ConfirmTagDelete) 
+Response: [ConfirmTagDelete](TagsDocLink#ConfirmTagDelete) 
 ```json
 {
   "Delete_status": "True/False"
 }
 ```
-Request: [DeleteTag](GatewayLink#DeleteTag)
+Request: [DeleteTag](GatewayDocLink#DeleteTag)
 ```json
 {
   "Tag_ID": "<Tag-ID>"
 }
 ```
 ## ReturnTag
-Response: [ReturnTag](TagsLink#ReturnTag) 
+Response: [ReturnTag](TagsDocLink#ReturnTag) 
 ```json
 {
   "Tag_Name": "<Tag-name>",
   "Tag_Desc": "<Tag-desc>",
 }
 ```
-Request: [RequestTag](GatewayLink#RequestTag)
+Request: [RequestTag](GatewayDocLink#RequestTag)
 ```json
 {
   "Tag_ID": "<Tag-ID>"
