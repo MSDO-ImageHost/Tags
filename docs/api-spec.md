@@ -8,7 +8,7 @@ Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/CreateTag
   "Tag_Desc": "<Tag desc>"
 }
 ```
-Response: [Tags](TagsSrcLink)/[ConfirmTagCreation](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ConfirmTagCreation) 
+Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ConfirmTagCreation](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ConfirmTagCreation) 
 ```json
 {
   "Tag_ID": "<TAG_ID>",
@@ -26,7 +26,7 @@ Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/UpdateTag
   "Tag_desc": "<New_Tag-desc> OR NULL" 
 }
 ```
-Response: [Tags](TagsSrcLink)/[ConfirmTagUpdate](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ConfirmTagUpdate) 
+Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ConfirmTagUpdate](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ConfirmTagUpdate) 
 ```json
 {
   "Status code": "HTTP status code",
@@ -41,7 +41,7 @@ Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/DeleteTag
   "Tag_ID": "<Tag-ID>"
 }
 ```
-Response: [Tags](TagsSrcLink)/[ConfirmTagDelete](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ConfirmTagDelete) 
+Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ConfirmTagDelete](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ConfirmTagDelete) 
 ```json
 {
   "Status code": "HTTP status code",
@@ -56,7 +56,7 @@ Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/RequestTag
   "Tag_ID": "<Tag-ID>"
 }
 ```
-Response: [Tags](TagsSrcLink)/[ReturnTag](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ReturnTag) 
+Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ReturnTag](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ReturnTag) 
 ```json
 {
   "Author": "User ID",
@@ -73,9 +73,9 @@ Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/RequestTagsForPost
   "Post_ID": "<Post_ID>"
 }
 ```
-Response: [Tags](TagsSrcLink)/[ReturnTagsForPost](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ReturnTagsForPost) 
+Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ReturnTagsForPost](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ReturnTagsForPost) 
 ```json
 {
-  "Tag_IDs": ["<Tag-ID1>", "<Tag-ID2>", "..."]
+  "Tag_IDs": "[<Tag-ID1>, <Tag-ID2>, ...]"
 }
 ```
