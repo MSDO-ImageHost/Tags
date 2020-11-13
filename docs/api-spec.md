@@ -76,6 +76,6 @@ Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/RequestTagsForPost
 Response: [Tags](TagsSrcLink)/[ReturnTagsForPost](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ReturnTagsForPost) 
 ```json
 {
-  "Tag_IDs": "[<Tag-ID1>, <Tag-ID2>, ...]"
+  "Tag_IDs": ["<Tag-ID1>", "<Tag-ID2>", "..."]
 }
 ```
