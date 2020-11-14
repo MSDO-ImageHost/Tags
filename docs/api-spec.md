@@ -67,7 +67,7 @@ Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ReturnTag](https://git
 }
 ```
 ## ReturnTagsForPost
-Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/RequestTagsForPost
+Request: [Posts](https://github.com/MSDO-ImageHost/Posts)/RequestTagsForPost
 ```json
 {
   "Post_ID": "<Post_ID>"
