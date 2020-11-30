@@ -1,0 +1,43 @@
+
+routing_key=CreateTag
+{
+    "author_id": 420, 
+    "post_id": 1337, 
+    "tag_name": "Burger", 
+    "tag_desc": "This tag was created through RabbitMQ"
+}
+
+routing_key=UpdateTag
+{
+    "tag_id": 1,
+    "new_name": "Updated name from RabbitMQ",
+    "new_desc": "Updated description from RabbitMQ"
+}
+
+routing_key=RequestTag
+{
+    "tag_id": 1
+}
+
+routing_key=CreateTag
+{
+    "author_id": 420, 
+    "post_id": 1337, 
+    "tag_name": "Tag to be deleted", 
+    "tag_desc": "This tag was created only to be deleted :-("
+}
+
+routing_key=RequestTagsForPost
+{
+    "post_id": 1337
+}
+
+routing_key=DeleteTag
+{
+    "tag_id": 2
+}
+
+routing_key=RequestTagsForPost
+{
+    "post_id": 1337
+}

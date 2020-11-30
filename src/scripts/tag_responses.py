@@ -3,7 +3,6 @@ import datetime
 
 from django.db.models.query import QuerySet
 from api.models import Tag
-from typing import List
 
 def confirm_tag_creation(tag: Tag) -> str:
     return json.dumps({
@@ -36,6 +35,7 @@ def return_tag(tag: Tag) -> str:
 
 def return_tags_for_post(tags: QuerySet[Tag]) -> str:
     serialized = [{
+        "tag_id": tag.id,
         "post": tag.post_id,
         "author": tag.author_id,
         "tag_name": tag.name,
@@ -44,3 +44,12 @@ def return_tags_for_post(tags: QuerySet[Tag]) -> str:
         "updated_at": tag.updated_at
     } for tag in tags]
     return json.dumps(serialized, indent=4, default=str)
+
+def error_response(error_message: str) -> str:
+    return json.dumps({
+        "error": error_message,
+        "status_code": 404
+    }, indent=4)
+
+def unknown_request() -> str:
+    return json.dumps({"status_code": 404}, indent=4)
