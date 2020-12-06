@@ -45,11 +45,8 @@ def return_tags_for_post(tags: QuerySet[Tag]) -> str:
     } for tag in tags]
     return json.dumps(serialized, indent=4, default=str)
 
-def error_response(error_message: str) -> str:
+def error_response(error_message: str, status_code: int) -> str:
     return json.dumps({
         "error": error_message,
-        "status_code": 404
+        "status_code": status_code
     }, indent=4)
-
-def unknown_request() -> str:
-    return json.dumps({"status_code": 404}, indent=4)

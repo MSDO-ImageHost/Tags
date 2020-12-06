@@ -12,9 +12,7 @@ def test() -> None:
 
 
 def run() -> None:
-    tags = tag_requests.request_tags_for_post(post_id=1337)
-    #rabbitmq.send("ReturnTagsForPost", return_tags_for_post(tags))
     events = ['CreateTag', 'UpdateTag', 'DeleteTag', 'RequestTag', 'RequestTagsForPost']
     rabbitmq = RabbitMQ()
-    rabbitmq.setup()
-    rabbitmq.receive(events)
+    rabbitmq.setup(events)
+    rabbitmq.receive()

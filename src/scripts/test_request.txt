@@ -1,9 +1,8 @@
 
 routing_key=CreateTag
 {
-    "author_id": 420, 
     "post_id": 1337, 
-    "tag_name": "Burger", 
+    "tag_name": "Very new tag", 
     "tag_desc": "This tag was created through RabbitMQ"
 }
 
@@ -21,7 +20,6 @@ routing_key=RequestTag
 
 routing_key=CreateTag
 {
-    "author_id": 420, 
     "post_id": 1337, 
     "tag_name": "Tag to be deleted", 
     "tag_desc": "This tag was created only to be deleted :-("

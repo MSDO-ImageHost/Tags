@@ -30,6 +30,8 @@ services:
   tags:
     build: .
     container_name: tags
+    volumes: 
+      - "./Tags/src/db.sqlite3:/app/src/db.sqlite3"
     depends_on:
       - rabbitmq
     networks:
@@ -43,4 +45,4 @@ services:
       - AMQP_PASS=${RABBITMQ_PASSWORD}
       - AMQP_URI=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
     restart: unless-stopped
-
+    
