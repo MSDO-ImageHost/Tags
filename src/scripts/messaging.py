@@ -20,7 +20,7 @@ class RabbitMQ:
         credentials = pika.PlainCredentials(AMQP_USER, AMQP_PASS)
         print("Establishing connection...")
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host='localhost',
+            host='rabbitmq',
             port=5672,
             virtual_host='/',
             credentials=credentials))
