@@ -1,17 +1,14 @@
-from jose.jwt import decode
 import pika
 import json
 
-from typing import List, Dict, Optional
+from typing import List, Dict
 from .tag_requests import *
 from .tag_responses import *
 from api.models import Tag
-from Tags.settings import AMQP_PASS, AMQP_URI, AMQP_USER
+from Tags.settings import AMQP_PASS, AMQP_USER
 from .jwt import verify
 from jose.exceptions import ExpiredSignatureError, JWTError
 from pika.spec import BasicProperties
-
-from scripts import jwt
 
 
 class RabbitMQ:
@@ -52,8 +49,6 @@ def callback(channel, method, properties, body) -> None:
     content_type = properties.content_type
     body, properties = receive(event, body, jwt_token, correlation_id, content_type)
     print(body)
-    print(properties.correlation_id)
-    print(properties.content_type)
     print(properties.headers)
 
 def send(event: str, data: Dict, jwt: str, status_code: int, message: str, correlation_id: str, content_type: str) -> str:
