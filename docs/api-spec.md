@@ -1,11 +1,28 @@
 # API Reference
-## ConfirmTagCreation
+
+## General
+### Access control
+Any request to Tags must contain a valid jwt in the header fields.
+
+### Metadata
+A response from Tags will contain some metadata, accessible via the properties of the response message. The properties will include correlation_id and content_type fields, along with a header field. The header field looks as follows:
+```json
+{
+  "jwt": "<jwt token>",
+  "status_code": "<http status code>",
+  "message": "<message describing the status code>"
+}
+```
+
+## Tags
+
+### ConfirmTagCreation
 Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/CreateTag
 ```json
 {
-  "Author_ID": "<User_ID>",
   "Tag_Name": "<Tag name>",
-  "Tag_Desc": "<Tag desc>"
+  "Tag_Desc": "<Tag desc>",
+  "Post_ID": "<POST_ID>"
 }
 ```
 Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ConfirmTagCreation](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ConfirmTagCreation) 
@@ -17,7 +34,7 @@ Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ConfirmTagCreation](ht
 }
 ```
 [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
-## ConfirmTagUpdate
+### ConfirmTagUpdate
 Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/UpdateTag
 ```json
 {
@@ -29,12 +46,11 @@ Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/UpdateTag
 Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ConfirmTagUpdate](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ConfirmTagUpdate) 
 ```json
 {
-  "Status code": "HTTP status code",
-  "Updated at": "<ISO8601 timestamp>"
+  "Updated_at": "<ISO8601 timestamp>"
 }
 ```
 [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
-## ConfirmTagDelete
+### ConfirmTagDelete
 Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/DeleteTag
 ```json
 {
@@ -44,12 +60,11 @@ Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/DeleteTag
 Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ConfirmTagDelete](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ConfirmTagDelete) 
 ```json
 {
-  "Status code": "HTTP status code",
   "deleted_at": "<ISO8601 timestamp>"
 }
 ```
 [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
-## ReturnTag
+### ReturnTag
 Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/RequestTag
 ```json
 {
@@ -59,23 +74,35 @@ Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/RequestTag
 Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ReturnTag](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ReturnTag) 
 ```json
 {
-  "Author": "User ID",
+  "Tag_ID": "<Tag-ID>",
+  "Post_ID": "<POST_ID>",
+  "Author": "<User ID>",
   "Tag_Name": "<Tag-name>",
   "Tag_Desc": "<Tag-desc>",
-  "Created at": "<ISO8601 timestamp>",
-  "Last updated at": "<ISO8601 timestamp>"
+  "Created_at": "<ISO8601 timestamp>",
+  "Updated_at": "<ISO8601 timestamp>"
 }
 ```
-## ReturnTagsForPost
+### ReturnTagsForPost
 Request: [Posts](https://github.com/MSDO-ImageHost/Posts)/RequestTagsForPost
 ```json
 {
   "Post_ID": "<Post_ID>"
 }
 ```
+List of tags 
 Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ReturnTagsForPost](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ReturnTagsForPost) 
 ```json
 {
-  "Tag_IDs": "[<Tag-ID1>, <Tag-ID2>, ...]"
+  [
+    "Tag_ID": "<Tag-ID>",
+    "Post_ID": "<POST_ID>",
+    "Author": "<User ID>",
+    "Tag_Name": "<Tag-name>",
+    "Tag_Desc": "<Tag-desc>",
+    "Created_at": "<ISO8601 timestamp>",
+    "Updated_at": "<ISO8601 timestamp>"
+  ]
+  ...
 }
 ```
