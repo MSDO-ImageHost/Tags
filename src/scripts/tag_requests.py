@@ -32,6 +32,7 @@ def delete_tag(jwt: Dict, tag_id: int) -> Dict:
 def request_tag(jwt: Dict, tag_id: int) -> Dict:
     tag = Tag.objects.get(id=tag_id)
     return {
+        "tag_id": tag.id,
         "post": tag.post_id,
         "author": tag.author_id,
         "tag_name": tag.name,
