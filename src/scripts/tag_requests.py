@@ -1,7 +1,6 @@
 import datetime
-from typing import Dict
+from typing import Dict, List
 
-from django.db.models.query import QuerySet
 from api.models import Tag
 
 def create_tag(jwt: Dict, tag_name: str, tag_desc: str, post_id: int) -> Dict:
@@ -41,7 +40,7 @@ def request_tag(jwt: Dict, tag_id: int) -> Dict:
         "updated_at": tag.updated_at
     }
 
-def request_tags_for_post(jwt: Dict, post_id: int) -> Dict:
+def request_tags_for_post(jwt: Dict, post_id: int) -> List:
     tags = Tag.objects.filter(post_id=post_id)
     return [{
         "tag_id": tag.id,
