@@ -29,8 +29,7 @@ Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ConfirmTagCreation](ht
 ```json
 {
   "Tag_ID": "<TAG_ID>",
-  "Status code": "HTTP status code",
-  "Created at": "<ISO8601 timestamp>"
+  "Created_at": "<ISO8601 timestamp>"
 }
 ```
 [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
