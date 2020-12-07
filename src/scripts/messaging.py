@@ -3,7 +3,6 @@ import json
 
 from typing import List, Dict
 from .tag_requests import *
-from .tag_responses import *
 from api.models import Tag
 from Tags.settings import AMQP_PASS, AMQP_USER
 from .jwt import verify
