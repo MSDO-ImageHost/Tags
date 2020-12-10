@@ -1,11 +1,11 @@
 import datetime
+
 from typing import Dict, List
+from api.models import Tag, TaggedPost
 
-from api.models import Tag
-
-def create_tag(jwt: Dict, tag_name: str, tag_desc: str, post_id: int) -> Dict:
+def create_tag(jwt: Dict, tag_name: str, tag_desc: str) -> Dict:
     author_id = jwt['sub']
-    tag = Tag(name=tag_name, description=tag_desc, post_id=post_id, author_id=author_id)
+    tag = Tag(name=tag_name, description=tag_desc, author_id=author_id)
     tag.save()
     return {
         "tag_id": tag.id, 
@@ -28,26 +28,24 @@ def delete_tag(jwt: Dict, tag_id: int) -> Dict:
         "deleted_at": datetime.datetime.now()
     }
 
-def request_tag(jwt: Dict, tag_id: int) -> Dict:
+def add_tag_to_post(jwt: Dict, tag_id: int, post_id: str) -> Dict:
+    tagger_id = jwt['sub']
     tag = Tag.objects.get(id=tag_id)
+    tagged_post = TaggedPost(tag=tag, post_id=post_id, tagger_id=tagger_id)
+    tagged_post.save()
     return {
-        "tag_id": tag.id,
-        "post": tag.post_id,
-        "author": tag.author_id,
-        "tag_name": tag.name,
-        "tag_desc": tag.description,
-        "created_at": tag.created_at,
-        "updated_at": tag.updated_at
+        "tag_id": tag_id,
+        "post_id": post_id
     }
 
+def request_tag(jwt: Dict, tag_id: int) -> Dict:
+    tag = Tag.objects.get(id=tag_id)
+    return tag.serialize()
+
 def request_tags_for_post(jwt: Dict, post_id: int) -> List:
-    tags = Tag.objects.filter(post_id=post_id)
-    return [{
-        "tag_id": tag.id,
-        "post": tag.post_id,
-        "author": tag.author_id,
-        "tag_name": tag.name,
-        "tag_desc": tag.description,
-        "created_at": tag.created_at,
-        "updated_at": tag.updated_at
-    } for tag in tags]
+    tagged_posts = TaggedPost.objects.filter(post_id=post_id)
+    return [tp.tag.serialize() for tp in tagged_posts]
+
+def request_posts_for_tags(jwt: Dict, tag_id: int) -> List:
+    tagged_posts = TaggedPost.objects.filter(tag__id=tag_id)
+    return [{"post_id": tp.post_id} for tp in tagged_posts]

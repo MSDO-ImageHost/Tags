@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 
 from pathlib import Path
-from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,9 +29,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-load_dotenv()
-AMQP_USER = os.getenv("RABBITMQ_USERNAME")
-AMQP_PASS = os.getenv("RABBITMQ_PASSWORD")
+AMQP_USER = os.environ["AMQP_USER"]
+AMQP_PASS = os.environ["AMQP_PASS"]
 AMQP_URI = f"amqp://{AMQP_USER}:{AMQP_PASS}@rabbitmq:5672"
 
 # Application definition
