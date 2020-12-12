@@ -29,9 +29,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-AMQP_USER = os.environ["AMQP_USER"]
-AMQP_PASS = os.environ["AMQP_PASS"]
-AMQP_URI = f"amqp://{AMQP_USER}:{AMQP_PASS}@rabbitmq:5672"
+try:
+    AMQP_USER = os.environ["AMQP_USER"]
+    AMQP_PASS = os.environ["AMQP_PASS"]
+except KeyError:
+    AMQP_USER = "guest"
+    AMQP_PASS = "guest"
 
 # Application definition
 

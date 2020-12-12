@@ -32,3 +32,5 @@ class TaggedPost(models.Model):
     def __repr__(self):
         return f"{type(self).__name__}(tag_id={self.tag.id}, post_id={self.post_id}, post={self.post_id}, tagger_id={self.tagger_id})"
 
+    def __str__(self):
+        return f"id of tag: {self.tag.id}\nid of post: {self.post_id}\nid of tagger: {self.tagger_id}"

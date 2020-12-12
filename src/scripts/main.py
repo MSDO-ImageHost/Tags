@@ -3,14 +3,21 @@ from .messaging import RabbitMQ
 from api.models import Tag, TaggedPost
 
 def test() -> None:
-    tags = tag_requests.request_tags_for_post(jwt={}, post_id=1337)
-    print(tags)
+    tags = Tag.objects.all()
+    tagged_posts = TaggedPost.objects.all()
+    for tp in tagged_posts:
+        print(tp)
+        print()
+    print()
+    for tag in tags:
+        print(tag)
+        print()
 
 def main() -> None:
-    events = ['CreateTag', 'UpdateTag', 'DeleteTag', 'RequestTag', 'RequestTagsForPost', 'RequestPostsForTag']
+    events = ['CreateTag', 'UpdateTag', 'DeleteTag', 'AddTagToPost', 'RequestTag', 'RequestTagsForPost', 'RequestPostsForTag']
     rabbitmq = RabbitMQ()
     rabbitmq.setup(events)
     rabbitmq.receive()
     
 def run() -> None:
-    test()
+    main()

@@ -1,7 +1,7 @@
 import pika
 import json
 
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from .tag_requests import *
 from api.models import Tag
 from Tags.settings import AMQP_PASS, AMQP_USER
@@ -43,14 +43,11 @@ class RabbitMQ:
 def callback(channel, method, properties, body) -> None:
     event = method.routing_key
     body = json.loads(body)
-    jwt_token = properties.headers['jwt']
-    correlation_id = properties.correlation_id
-    content_type = properties.content_type
-    body, properties = receive(event, body, jwt_token, correlation_id, content_type)
+    body, properties = receive(event, body, properties)
     print(body)
     print(properties.headers)
 
-def send(event: str, data: Dict, jwt: str, status_code: int, message: str, correlation_id: str, content_type: str) -> str:
+def send(event: str, data: Dict, jwt: str, status_code: int, message: str, correlation_id: str, content_type: str) -> Tuple:
     rabbitmq = RabbitMQ()
     body = json.dumps(data, indent=4, default=str)
     headers = {"jwt": jwt, "status_code": status_code, "message": message}
@@ -58,50 +55,113 @@ def send(event: str, data: Dict, jwt: str, status_code: int, message: str, corre
     rabbitmq.send(event, body, properties)
     return (body, properties)
 
-def receive(event: str, body: Dict, jwt_token: str, correlation_id, content_type: str) -> str:
+def handle_event(event: str, body: Dict, auth_needed: bool, **kwargs) -> Tuple:
+    if auth_needed:
+        jwt = kwargs["jwt"]
+        user_id = jwt["sub"]
+        role = jwt["role"]
+
+        if event == "CreateTag":
+            return (
+                create_tag(user_id, body["tag_name"], body["tag_desc"]),
+                200,
+                "OK"
+            )
+
+        elif event == "UpdateTag":
+            tag = Tag.objects.get(id=body["tag_id"])
+            if user_id != tag.author_id and role != "admin":  # change role to int
+                return ({}, 401, "User does not have access to update tag")
+            return (
+                    update_tag(tag, body["new_name"], body["new_desc"]),
+                    200,
+                    "OK"
+            )
+                
+        elif event == "DeleteTag":
+            tag = Tag.objects.get(id=body["tag_id"])
+            if user_id != tag.author_id and role != "admin":  # change role to int
+                return ({}, 401, "User does not have access to delete tag")
+            return (delete_tag(tag), 200, "OK")
+
+        elif event == "AddTagToPost":
+            tag = Tag.objects.get(id=body["tag_id"])
+            post = body["post"]
+            if role != "admin":   # change role to int
+                if user_id != post["author_id"]:
+                    return ({}, 401, "User does not own post")
+                if user_id != tag.author_id:
+                    return ({}, 401, "User does not own tag")
+            return (
+                add_tag_to_post(tag, post["post_id"], user_id),
+                200,
+                "OK"
+            )
+    
+    else:
+        
+        if event == "RequestTag":
+            try:
+                data = request_tag(body["tag_id"])
+                return (data, 200, "OK")
+            except Tag.DoesNotExist:
+                return ({}, 404, "Tag not found")
+        
+        elif event == "RequestTagsForPost":
+            return (request_tags_for_post(body["post_id"]), 200, "OK")
+        
+        elif event == "RequestPostsForTag":
+            return (request_posts_for_tags(body["tag_id"]), 200, "OK")
+    
+
+def check_jwt(jwt_token: str):
+    try:
+        verify(jwt_token)
+    except (ExpiredSignatureError, JWTError):
+        return False
+    return True
+
+def receive(event: str, body: Dict, properties: BasicProperties) -> str:
     responses = {
-        "CreateTag": (create_tag, "ConfirmTagCreation"),
-        "UpdateTag": (update_tag, "ConfirmTagUpdate"),
-        "DeleteTag": (delete_tag, "ConfirmTagDeletion"),
-        "RequestTag": (request_tag, "ReturnTag"),
-        "RequestTagsForPost": (request_tags_for_post, "ReturnTagsForPost")
+        "CreateTag": "ConfirmTagCreation",
+        "UpdateTag": "ConfirmTagUpdate",
+        "DeleteTag": "ConfirmTagDeletion",
+        "AddTagToPost": "ConfirmAddedTag",
+        "RequestTag": "ReturnTag",
+        "RequestTagsForPost": "ReturnTagsForPost",
+        "RequestPostsForTag": "ReturnPostsForTag"
     }
 
-    decoded_token = {}
+    response_event = responses[event]
     body = {key.lower(): value for key, value in body.items()}
-    response_event = responses[event][1]
-
-    try:
-        decoded_token = verify(jwt_token)
-    except (ExpiredSignatureError, JWTError):
-        return send(
-            event=response_event,
-            data={},
-            jwt=jwt_token,
-            status_code=401,
-            message="Invalid token",
-            correlation_id=correlation_id,
-            content_type=content_type
-        )
-
-    try:
-        response_data = responses[event][0](decoded_token, **body)
-    except Tag.DoesNotExist:
-        return send(
-            event=response_event,
-            data={},
-            jwt=jwt_token,
-            status_code=404,
-            message="Tag not found",
-            correlation_id=correlation_id,
-            content_type=content_type
-        )
+    jwt_token = properties.headers["jwt"]
+    correlation_id = properties.correlation_id
+    content_type = properties.content_type
+    decoded_token = {}
+    auth_needed = False
+    
+    if event in ["CreateTag", "UpdateTag", "DeleteTag", "AddTagToPost"]:
+        if check_jwt(jwt_token):
+            decoded_token = verify(jwt_token)
+            auth_needed = True
+        else:
+            return send(
+                event=response_event,
+                data={},
+                jwt=jwt_token,
+                status_code=401,
+                message="Invalid token",
+                correlation_id=correlation_id,
+                content_type=content_type
+            )
+    
+    response_data, code, message = handle_event(event, body, auth_needed, jwt=decoded_token)
     return send(
         event=response_event,
         data=response_data,
         jwt=jwt_token,
-        status_code=200,
-        message="OK",
+        status_code=code,
+        message=message,
         correlation_id=correlation_id,
         content_type=content_type
     )
