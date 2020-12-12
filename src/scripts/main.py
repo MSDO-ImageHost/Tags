@@ -14,7 +14,7 @@ def test() -> None:
         print()
 
 def main() -> None:
-    events = ['CreateTag', 'UpdateTag', 'DeleteTag', 'AddTagToPost', 'RequestTag', 'RequestTagsForPost', 'RequestPostsForTag']
+    events = ['CreateTag', 'UpdateTag', 'DeleteTag', 'AddTagToPost', 'RemoveTagFromPost', 'RequestTag', 'RequestTagsForPost', 'RequestPostsForTag']
     rabbitmq = RabbitMQ()
     rabbitmq.setup(events)
     rabbitmq.receive()

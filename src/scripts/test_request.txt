@@ -25,7 +25,7 @@ routing_key=CreateTag
 
 routing_key=RequestTagsForPost
 {
-    "post_id": 1337
+    "post_id": "5fd25d5f812d6b21e2fb4d6c"
 }
 
 routing_key=DeleteTag
@@ -33,7 +33,28 @@ routing_key=DeleteTag
     "tag_id": 2
 }
 
+routing_key=AddTagToPost
+{
+  "tag_id": 1,
+  "post_id": "sickpostid",
+  "post_author": 5
+}
+
+routing_key=AddTagToPost
+{
+  "tag_id": 1,
+  "post_id": "sickpostid",
+  "post_author": 3
+}
+
+routing_key=RemoveTagFromPost
+{
+  "tag_id": 1,
+  "post_id": "sickpostid",
+  "post_author": 5
+}
+
 routing_key=RequestTagsForPost
 {
-    "post_id": 1337
+    "post_id": "5fd25d5f812d6b21e2fb4d6c"
 }

@@ -3,7 +3,6 @@ import json
 
 from typing import List, Dict, Tuple
 from .tag_requests import *
-from api.models import Tag
 from Tags.settings import AMQP_PASS, AMQP_USER
 from .jwt import verify
 from jose.exceptions import ExpiredSignatureError, JWTError
@@ -47,18 +46,17 @@ def callback(channel, method, properties, body) -> None:
     print(body)
     print(properties.headers)
 
-def send(event: str, data: Dict, jwt: str, status_code: int, message: str, correlation_id: str, content_type: str) -> Tuple:
+def send(event: str, data: Dict, status_code: int, message: str, correlation_id: str, content_type: str) -> Tuple:
     rabbitmq = RabbitMQ()
     body = json.dumps(data, indent=4, default=str)
-    headers = {"jwt": jwt, "status_code": status_code, "message": message}
+    headers = {"status_code": status_code, "message": message}
     properties = BasicProperties(content_type=content_type, headers=headers, correlation_id=correlation_id)
     rabbitmq.send(event, body, properties)
     return (body, properties)
 
-def handle_event(event: str, body: Dict, auth_needed: bool, **kwargs) -> Tuple:
+def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
     if auth_needed:
-        jwt = kwargs["jwt"]
-        user_id = jwt["sub"]
+        user_id = int(jwt["sub"])
         role = jwt["role"]
 
         if event == "CreateTag":
@@ -69,40 +67,55 @@ def handle_event(event: str, body: Dict, auth_needed: bool, **kwargs) -> Tuple:
             )
 
         elif event == "UpdateTag":
-            tag = Tag.objects.get(id=body["tag_id"])
-            if user_id != tag.author_id and role != "admin":  # change role to int
-                return ({}, 401, "User does not have access to update tag")
-            return (
-                    update_tag(tag, body["new_name"], body["new_desc"]),
-                    200,
-                    "OK"
-            )
+            tag_id = body["tag_id"]
+            try:
+                update = update_tag(user_id, role, tag_id, body["new_name"], body["new_desc"])
+            except Tag.DoesNotExist:
+                return ({}, 404, "Tag not found")
+            if isinstance(update, str):
+                return ({}, 403, update)
+            return (update, 200, "OK")
                 
         elif event == "DeleteTag":
-            tag = Tag.objects.get(id=body["tag_id"])
-            if user_id != tag.author_id and role != "admin":  # change role to int
-                return ({}, 401, "User does not have access to delete tag")
-            return (delete_tag(tag), 200, "OK")
+            tag_id = body["tag_id"]
+            try:
+                delete = delete_tag(user_id, role, tag_id)
+            except Tag.DoesNotExist:
+                return ({}, 404, "Tag not found")
+            if isinstance(delete, str):
+                return ({}, 403, delete)
+            return (delete, 200, "OK")
 
         elif event == "AddTagToPost":
-            tag = Tag.objects.get(id=body["tag_id"])
-            post = body["post"]
-            if role != "admin":   # change role to int
-                if user_id != post["author_id"]:
-                    return ({}, 401, "User does not own post")
-                if user_id != tag.author_id:
-                    return ({}, 401, "User does not own tag")
-            return (
-                add_tag_to_post(tag, post["post_id"], user_id),
-                200,
-                "OK"
-            )
-    
+            tag_id = body["tag_id"]
+            post_id = body["post_id"]
+            post_author = body["post_author"]
+            try:
+                tagged_post = add_tag_to_post(user_id, role, post_author, tag_id, post_id)
+            except Tag.DoesNotExist:
+                return ({}, 404, "Tag not found")
+            if isinstance(tagged_post, str):
+                return ({}, 403, tagged_post)
+            return (tagged_post, 200, "OK")
+
+        elif event == "RemoveTagFromPost":
+            tag_id = body["tag_id"]
+            post_id = body["post_id"]
+            post_author = body["post_author"]
+            try:
+                removed_tag = remove_tag_from_post(user_id, role, post_author, tag_id, post_id)
+            except TaggedPost.DoesNotExist:
+                return ({}, 404, "Tag not found")
+            if isinstance(removed_tag, str):
+                return ({}, 403, removed_tag)
+            return (removed_tag, 200, "OK")
+
     else:
         
         if event == "RequestTag":
+            tag_id = body["tag_id"]
             try:
-                data = request_tag(body["tag_id"])
+                data = request_tag(tag_id)
                 return (data, 200, "OK")
             except Tag.DoesNotExist:
                 return ({}, 404, "Tag not found")
@@ -127,6 +140,7 @@ def receive(event: str, body: Dict, properties: BasicProperties) -> str:
         "UpdateTag": "ConfirmTagUpdate",
         "DeleteTag": "ConfirmTagDeletion",
         "AddTagToPost": "ConfirmAddedTag",
+        "RemoveTagFromPost": "ConfirmTagRemoval",
         "RequestTag": "ReturnTag",
         "RequestTagsForPost": "ReturnTagsForPost",
         "RequestPostsForTag": "ReturnPostsForTag"
@@ -140,7 +154,7 @@ def receive(event: str, body: Dict, properties: BasicProperties) -> str:
     decoded_token = {}
     auth_needed = False
     
-    if event in ["CreateTag", "UpdateTag", "DeleteTag", "AddTagToPost"]:
+    if event in ["CreateTag", "UpdateTag", "DeleteTag", "AddTagToPost", "RemoveTagFromPost"]:
         if check_jwt(jwt_token):
             decoded_token = verify(jwt_token)
             auth_needed = True
@@ -155,11 +169,10 @@ def receive(event: str, body: Dict, properties: BasicProperties) -> str:
                 content_type=content_type
             )
     
-    response_data, code, message = handle_event(event, body, auth_needed, jwt=decoded_token)
+    response_data, code, message = handle_event(event, body, decoded_token, auth_needed)
     return send(
         event=response_event,
         data=response_data,
-        jwt=jwt_token,
         status_code=code,
         message=message,
         correlation_id=correlation_id,
