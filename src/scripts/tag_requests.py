@@ -32,12 +32,16 @@ def add_tag_to_post(user_id: int, role: str, post_author: int, tag_id: int, post
     if role != "admin":   # change role to int
         if user_id != post_author:
             return "User does not own post"
-    tagged_post = TaggedPost(tag=tag, post_id=post_id, tagger_id=user_id)
-    tagged_post.save()
-    return {
-        "tag_id": tag.id,
-        "post_id": post_id
-    }
+    try:
+        TaggedPost.objects.get(tag__id=tag_id, post_id=post_id)
+        return "Post does already have that tag"
+    except TaggedPost.DoesNotExist:
+        tagged_post = TaggedPost(tag=tag, post_id=post_id, tagger_id=user_id)
+        tagged_post.save()
+        return {
+            "tag_id": tag.id,
+            "post_id": post_id
+        }
 
 def remove_tag_from_post(user_id: int, role: str, post_author: int, tag_id: int, post_id: str) -> Dict:
     if role != "admin":   # change role to int

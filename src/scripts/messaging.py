@@ -105,9 +105,13 @@ def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
             try:
                 removed_tag = remove_tag_from_post(user_id, role, post_author, tag_id, post_id)
             except TaggedPost.DoesNotExist:
-                return ({}, 404, "Tag not found")
+                return ({}, 404, "Post does not have that tag")
             if isinstance(removed_tag, str):
-                return ({}, 403, removed_tag)
+                if removed_tag == "User does not own post":
+                    error_code = 403
+                else:
+                    error_code = 400
+                return ({}, error_code, removed_tag)
             return (removed_tag, 200, "OK")
 
     else:
@@ -162,7 +166,6 @@ def receive(event: str, body: Dict, properties: BasicProperties) -> str:
             return send(
                 event=response_event,
                 data={},
-                jwt=jwt_token,
                 status_code=401,
                 message="Invalid token",
                 correlation_id=correlation_id,
