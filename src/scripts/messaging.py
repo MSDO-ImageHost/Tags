@@ -3,7 +3,7 @@ import json
 
 from typing import List, Dict, Tuple
 from .tag_requests import *
-from Tags.settings import AMQP_PASS, AMQP_USER
+from Tags.settings import AMQP_PASS, AMQP_USER, AMQP_HOST
 from .jwt import verify
 from jose.exceptions import ExpiredSignatureError, JWTError
 from pika.spec import BasicProperties
@@ -15,7 +15,7 @@ class RabbitMQ:
         credentials = pika.PlainCredentials(AMQP_USER, AMQP_PASS)
         print("Establishing connection...")
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host='rabbitmq',
+            host=AMQP_HOST,
             port=5672,
             virtual_host='/',
             credentials=credentials))
@@ -57,7 +57,7 @@ def send(event: str, data: Dict, status_code: int, message: str, correlation_id:
 def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
     if auth_needed:
         user_id = int(jwt["sub"])
-        role = jwt["role"]
+        role = int(jwt["role"])
 
         if event == "CreateTag":
             return (
@@ -134,7 +134,8 @@ def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
 def check_jwt(jwt_token: str):
     try:
         verify(jwt_token)
-    except (ExpiredSignatureError, JWTError):
+    except (ExpiredSignatureError, JWTError) as e:
+        print(e)
         return False
     return True
 
