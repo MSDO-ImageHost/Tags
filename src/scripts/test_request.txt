@@ -2,7 +2,10 @@ jwt = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1Iiwicm9sZSI6MCwiaXNzIjoiS
 
 
 routing_key=CreateTag
-
+{
+    "tag_name": "Cool tag", 
+    "tag_desc": "Very cool tag"
+}
 
 routing_key=UpdateTag
 {

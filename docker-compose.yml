@@ -2,7 +2,9 @@ version: '3'
 
 networks:
   public:
-    driver: bridge
+  rabbit-network:
+    external:
+      name: webgateway_rabbit-network
 
 
 volumes:
@@ -13,20 +15,7 @@ volumes:
 
 
 services:
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    volumes:
-      - rabbitmq_data:/bitnami
-    ports:
-      - 15672:15672
-    networks:
-      - public
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
-    restart: unless-stopped
-
+  
   mySQL:
     image: mysql:8
     command: --init-file /data/application/init.sql
@@ -47,13 +36,13 @@ services:
     build: .
     container_name: tags
     depends_on:
-      - rabbitmq
       - mySQL
     networks:
+      - rabbit-network
       - public
     ports:
       - 8080:80
-      - 3000:3000
+      - 5001:5000
     environment:
       - AMQP_USER=${RABBITMQ_USERNAME}
       - AMQP_PASS=${RABBITMQ_PASSWORD}
