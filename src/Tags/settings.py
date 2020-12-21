@@ -31,8 +31,7 @@ INSTALLED_APPS = [
     'django_extensions'
 ]
 
-print("MYSQL_HOST", MYSQL_HOST)
-
+print("MYSQL_HOST:", MYSQL_HOST)
 
 # Database
 DATABASES = {

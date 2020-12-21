@@ -15,6 +15,7 @@ class RabbitMQ:
     def __init__(self) -> None:
         credentials = pika.PlainCredentials(AMQP_USER, AMQP_PASS)
         print("Establishing connection...")
+        print("AMQP_HOST:", AMQP_HOST)
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(
             host=AMQP_HOST,
             port=5672,
@@ -50,9 +51,10 @@ def send(event: str, data: Dict, status_code: int, message: str, correlation_id:
     headers = {"status_code": status_code, "message": message}
     properties = BasicProperties(content_type=content_type, headers=headers, correlation_id=correlation_id)
     print("Sending event:", event)
-    print("Body:", data)
+    print("Body:", body)
     print(headers)
-    rabbitmq.send(event, body, properties)
+    if event != "ConfirmOnePostCreation":
+        rabbitmq.send(event, body, properties)
     print("Done sending")
     restart = status_code == 503
     print("Restarting after sending:", restart)
@@ -65,18 +67,25 @@ def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
         role = int(jwt["role"])
 
         if event == "CreateTag":
-            return (
-                create_tag(user_id, body["tag_name"], body["tag_desc"]),
-                200,
-                "OK"
-            )
+            try:
+                tag_desc = body["tag_desc"]
+            except KeyError:
+                tag_desc = None
+            create = create_tag(user_id, body["tag_name"], tag_desc)
+            if isinstance(create, str):
+                return ({}, 409, create)
+            return (create, 200, "OK")
 
         elif event == "UpdateTag":
             tag_id = body["tag_id"]
             try:
-                update = update_tag(user_id, role, tag_id, body["new_name"], body["new_desc"])
+                new_desc = body["new_desc"]
+            except KeyError:
+                new_desc = None
+            try:
+                update = update_tag(user_id, role, tag_id, body["new_name"], new_desc)
             except Tag.DoesNotExist:
-                return ({}, 404, "Tag not found")
+                return ({}, 404, f"Tag with id [{tag_id}] not found")
             if isinstance(update, str):
                 return ({}, 403, update)
             return (update, 200, "OK")
@@ -86,7 +95,7 @@ def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
             try:
                 delete = delete_tag(user_id, role, tag_id)
             except Tag.DoesNotExist:
-                return ({}, 404, "Tag not found")
+                return ({}, 404, f"Tag with id [{tag_id}] not found")
             if isinstance(delete, str):
                 return ({}, 403, delete)
             return (delete, 200, "OK")
@@ -98,10 +107,22 @@ def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
             try:
                 tagged_post = add_tag_to_post(user_id, role, post_author, tag_id, post_id)
             except Tag.DoesNotExist:
-                return ({}, 404, "Tag not found")
+                return ({}, 404, f"Tag with id [{tag_id}] not found")
             if isinstance(tagged_post, str):
                 return ({}, 403, tagged_post)
             return (tagged_post, 200, "OK")
+
+        elif event == "ConfirmOnePostCreation":
+            try:
+                tag_names = body["tags"]
+            except KeyError:
+                return {}, 200, "OK"
+            post_author = body["author_id"]
+            post_id = body["post_id"]
+            added_tags = add_tags_to_post(user_id, role, post_author, tag_names, post_id)
+            if isinstance(added_tags, str):
+                return ({}, 403, added_tags)
+            return (added_tags, 200, "OK")
 
         elif event == "RemoveTagFromPost":
             tag_id = body["tag_id"]
@@ -110,14 +131,11 @@ def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
             try:
                 removed_tag = remove_tag_from_post(user_id, role, post_author, tag_id, post_id)
             except TaggedPost.DoesNotExist:
-                return ({}, 404, "Post does not have that tag")
+                return ({}, 404, f"Post does not have tag with id [{tag_id}]")
             if isinstance(removed_tag, str):
-                if removed_tag == "User does not own post":
-                    error_code = 403
-                else:
-                    error_code = 400
-                return ({}, error_code, removed_tag)
+                return ({}, 403, removed_tag)
             return (removed_tag, 200, "OK")
+
 
     else:
         
@@ -153,7 +171,8 @@ def receive(event: str, body: Dict, properties: BasicProperties):
         "RemoveTagFromPost": "ConfirmTagRemoval",
         "RequestTag": "ReturnTag",
         "RequestTagsForPost": "ReturnTagsForPost",
-        "RequestPostsForTag": "ReturnPostsForTag"
+        "RequestPostsForTag": "ReturnPostsForTag",
+        "ConfirmOnePostCreation": "ConfirmOnePostCreation"
     }
 
     response_event = responses[event]
@@ -164,7 +183,7 @@ def receive(event: str, body: Dict, properties: BasicProperties):
     decoded_token = {}
     auth_needed = False
     
-    if event in ["CreateTag", "UpdateTag", "DeleteTag", "AddTagToPost", "RemoveTagFromPost"]:
+    if event in ["CreateTag", "UpdateTag", "DeleteTag", "AddTagToPost", "RemoveTagFromPost", "ConfirmOnePostCreation"]:
         if check_jwt(jwt_token):
             decoded_token = verify(jwt_token)
             auth_needed = True
