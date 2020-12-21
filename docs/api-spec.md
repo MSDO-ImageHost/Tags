@@ -114,7 +114,7 @@ Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ReturnTag](https://git
 }
 ```
 ### ReturnTagsForPost
-Request: [Posts](https://github.com/MSDO-ImageHost/Posts)/RequestTagsForPost
+Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/RequestTagsForPost
 ```json
 {
   "post_id": "<Post_ID>"
@@ -136,13 +136,13 @@ Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ReturnTagsForPost](htt
 ```
 
 ### ReturnPostsForTag
-Request: [Posts](https://github.com/MSDO-ImageHost/Posts)/RequestTagsForPost
+Request: [Gateway](https://github.com/MSDO-ImageHost/Gateway)/RequestPostsForTag
 ```json
 {
   "tag_id": "<Tag-ID>"
 }
 ```
-Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ReturnTagsForPost](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ReturnTagsForPost) 
+Response: [Tags](https://github.com/MSDO-ImageHost/Tags)/[ReturnPostsForTag](https://github.com/MSDO-ImageHost/Tags/blob/main/docs/api-spec.md#ReturnTagsForPost) 
 ```json
 [
   {
