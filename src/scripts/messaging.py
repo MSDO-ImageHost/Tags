@@ -7,6 +7,7 @@ from Tags.settings import AMQP_PASS, AMQP_USER, AMQP_HOST
 from .jwt import verify
 from jose.exceptions import ExpiredSignatureError, JWTError
 from pika.spec import BasicProperties
+from django.db.utils import OperationalError
 
 
 class RabbitMQ:
@@ -32,8 +33,7 @@ class RabbitMQ:
     def send(self, event: str, body: str, properties: Dict) -> None:
         self.channel.basic_publish(exchange='rapid', routing_key=event, body=body, properties=properties)
         self.connection.close()
-        print("Sent event:", event)
-
+        
     def receive(self) -> None:
         self.channel.basic_consume(queue='tags', on_message_callback=callback, auto_ack=True)
         self.channel.start_consuming()
@@ -42,17 +42,22 @@ class RabbitMQ:
 def callback(channel, method, properties, body) -> None:
     event = method.routing_key
     body = json.loads(body)
-    body, properties = receive(event, body, properties)
-    print(body)
-    print(properties.headers)
+    receive(event, body, properties)
 
-def send(event: str, data: Dict, status_code: int, message: str, correlation_id: str, content_type: str) -> Tuple:
+def send(event: str, data: Dict, status_code: int, message: str, correlation_id: str, content_type: str):
     rabbitmq = RabbitMQ()
     body = json.dumps(data, indent=4, default=str)
     headers = {"status_code": status_code, "message": message}
     properties = BasicProperties(content_type=content_type, headers=headers, correlation_id=correlation_id)
+    print("Sending event:", event)
+    print("Body:", data)
+    print(headers)
     rabbitmq.send(event, body, properties)
-    return (body, properties)
+    print("Done sending")
+    restart = status_code == 503
+    print("Restarting after sending:", restart)
+    if restart:
+        raise Exception("Restarting due to database connection error")
 
 def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
     if auth_needed:
@@ -139,7 +144,7 @@ def check_jwt(jwt_token: str):
         return False
     return True
 
-def receive(event: str, body: Dict, properties: BasicProperties) -> str:
+def receive(event: str, body: Dict, properties: BasicProperties):
     responses = {
         "CreateTag": "ConfirmTagCreation",
         "UpdateTag": "ConfirmTagUpdate",
@@ -164,7 +169,7 @@ def receive(event: str, body: Dict, properties: BasicProperties) -> str:
             decoded_token = verify(jwt_token)
             auth_needed = True
         else:
-            return send(
+            send(
                 event=response_event,
                 data={},
                 status_code=401,
@@ -172,9 +177,13 @@ def receive(event: str, body: Dict, properties: BasicProperties) -> str:
                 correlation_id=correlation_id,
                 content_type=content_type
             )
-    
-    response_data, code, message = handle_event(event, body, decoded_token, auth_needed)
-    return send(
+    try:
+        response_data, code, message = handle_event(event, body, decoded_token, auth_needed)
+    except OperationalError:
+        response_data = {}
+        code = 503
+        message = "Lost database connection"
+    send(
         event=response_event,
         data=response_data,
         status_code=code,
