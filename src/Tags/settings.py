@@ -9,11 +9,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Environment variables
 try:
-    AMQP_USER = os.environ["AMQP_USER"]
-    AMQP_PASS = os.environ["AMQP_PASS"]
-    AMQP_HOST = "rabbitmq"
+    AMQP_USER = os.environ["RABBITMQ_USERNAME"]
+    AMQP_PASS = os.environ["RABBITMQ_PASSWORD"]
+    AMQP_HOST = os.environ["RABBITMQ_HOST"]
     MYSQL_USER = os.environ["MYSQL_USER"]
-    MYSQL_PASS = os.environ["MYSQL_PASS"]
+    MYSQL_PASS = os.environ["MYSQL_PASSWORD"]
     MYSQL_HOST = os.environ["MYSQL_HOST"]
     SECRET_KEY = os.environ["SECRET_KEY"]
 except KeyError:
@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'django_extensions'
 ]
+
+print("MYSQL_HOST", MYSQL_HOST)
 
 
 # Database

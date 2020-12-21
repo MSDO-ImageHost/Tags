@@ -2,10 +2,6 @@ version: '3'
 
 networks:
   public:
-  rabbit-network:
-    external:
-      name: webgateway_rabbit-network
-
 
 volumes:
   rabbitmq_data:
@@ -15,6 +11,19 @@ volumes:
 
 
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    volumes:
+      - rabbitmq_data:/bitnami
+    ports:
+      - 15672:15672
+    networks:
+      - public
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    restart: unless-stopped
   
   mySQL:
     image: mysql:8
@@ -29,6 +38,8 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=rootpassword
       - MYSQL_DATABASE=Tags
+      - MYSQL_USER=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASS}
     ports:
       - 3306:3306
 
@@ -37,18 +48,19 @@ services:
     container_name: tags
     depends_on:
       - mySQL
+      - rabbitmq
     networks:
-      - rabbit-network
       - public
     ports:
       - 8080:80
       - 5001:5000
     environment:
-      - AMQP_USER=${RABBITMQ_USERNAME}
-      - AMQP_PASS=${RABBITMQ_PASSWORD}
-      - AMQP_URI=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - AMQP_URI=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}:5672
       - MYSQL_USER=${MYSQL_USERNAME}
-      - MYSQL_PASS=${MYSQL_PASS}
+      - MYSQL_PASSWORD=${MYSQL_PASS}
       - MYSQL_HOST=${MYSQL_HOST}
       - SECRET_KEY=${SECRET_KEY}
     restart: unless-stopped
