@@ -179,13 +179,13 @@ def receive(event: str, body: Dict, properties: BasicProperties):
 
     response_event = responses[event]
     body = {key.lower(): value for key, value in body.items()}
-    jwt_token = properties.headers["jwt"]
     correlation_id = properties.correlation_id
     content_type = properties.content_type
     decoded_token = {}
     auth_needed = False
     
     if event in ["CreateTag", "UpdateTag", "DeleteTag", "AddTagToPost", "RemoveTagFromPost", "ConfirmOnePostCreation"]:
+        jwt_token = properties.headers["jwt"]
         if check_jwt(jwt_token):
             decoded_token = verify(jwt_token)
             auth_needed = True
@@ -204,6 +204,7 @@ def receive(event: str, body: Dict, properties: BasicProperties):
         response_data = {}
         code = 503
         message = "Lost database connection"
+
     send(
         event=response_event,
         data=response_data,
