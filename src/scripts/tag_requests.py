@@ -71,6 +71,14 @@ def remove_tag_from_post(user_id: int, role: int, post_author: int, tag_id: int,
     tagged_post.delete()
     return {"removed_at": datetime.datetime.now()}
 
+def remove_all_tags_from_post(user_id: int, role: int, post_author: int, post_id: str) -> Dict:
+    if role < 20:
+        if user_id != post_author:
+            return f"User does not own post with id [{post_id}]"
+    tagged_posts = TaggedPost.objects.filter(post_id=post_id)
+    tagged_posts.delete()
+    return {"removed_at": datetime.datetime.now()}
+
 def request_tag(tag_id: int) -> Dict:
     tag = Tag.objects.get(id=tag_id)
     return tag.serialize()

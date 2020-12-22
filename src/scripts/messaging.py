@@ -52,14 +52,16 @@ def send(event: str, data: Dict, status_code: int, message: str, correlation_id:
     body = json.dumps(data, indent=4, default=str)
     headers = {"status_code": status_code, "message": message}
     properties = BasicProperties(content_type=content_type, headers=headers, correlation_id=correlation_id)
-    print("Sending event:", event)
-    print("Body:", body)
-    print(headers)
-    if event != "ConfirmOnePostCreation":
+    print("Reponse headers:", headers)
+    print("Response body:", body)
+
+    if event not in ["ConfirmOnePostCreation", "ConfirmOnePostDeletion"]:
+        print("Sending event:", event)
         rabbitmq.send(event, body, properties)
-    print("Done sending")
+        print("Done sending")
+
     restart = status_code == 503
-    print("Restarting after sending:", restart)
+    print("Restarting service:", restart)
     if restart:
         raise Exception("Restarting due to database connection error")
 
@@ -106,13 +108,21 @@ def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
             try:
                 tag_names = body["tags"]
             except KeyError:
-                return {}, 200, "OK"
+                return {}, 200, "Post does not contain any tags"
             post_author = int(body["author_id"])
             post_id = body["post_id"]
             added_tags = add_tags_to_post(user_id, role, post_author, tag_names, post_id)
             if isinstance(added_tags, str):
                 return ({}, 403, added_tags)
             return (added_tags, 200, "OK")
+
+        elif event == "ConfirmOnePostDeletion":
+            post_author = int(body["author_id"])
+            post_id = body["post_id"]
+            removed_tags = remove_all_tags_from_post(user_id, role, post_author, post_id)
+            if isinstance(removed_tags, str):
+                return ({}, 403, removed_tags)
+            return (removed_tags, 200, "OK")
 
         elif event == "AddTagToPost":
             tag_id = body["tag_id"]
@@ -174,7 +184,8 @@ def receive(event: str, body: Dict, properties: BasicProperties):
         "RequestTag": "ReturnTag",
         "RequestTagsForPost": "ReturnTagsForPost",
         "RequestPostsForTag": "ReturnPostsForTag",
-        "ConfirmOnePostCreation": "ConfirmOnePostCreation"
+        "ConfirmOnePostCreation": "ConfirmOnePostCreation",
+        "ConfirmOnePostDeletion": "ConfirmOnePostDeletion"
     }
 
     response_event = responses[event]
@@ -184,7 +195,7 @@ def receive(event: str, body: Dict, properties: BasicProperties):
     decoded_token = {}
     auth_needed = False
     
-    if event in ["CreateTag", "UpdateTag", "DeleteTag", "AddTagToPost", "RemoveTagFromPost", "ConfirmOnePostCreation"]:
+    if event in ["CreateTag", "UpdateTag", "DeleteTag", "AddTagToPost", "RemoveTagFromPost", "ConfirmOnePostCreation", "ConfirmOnePostDeletion"]:
         jwt_token = properties.headers["jwt"]
         if check_jwt(jwt_token):
             decoded_token = verify(jwt_token)
