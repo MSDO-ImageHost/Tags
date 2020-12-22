@@ -102,6 +102,18 @@ def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
                 return ({}, 403, delete)
             return (delete, 200, "OK")
 
+        elif event == "ConfirmOnePostCreation":
+            try:
+                tag_names = body["tags"]
+            except KeyError:
+                return {}, 200, "OK"
+            post_author = int(body["author_id"])
+            post_id = body["post_id"]
+            added_tags = add_tags_to_post(user_id, role, post_author, tag_names, post_id)
+            if isinstance(added_tags, str):
+                return ({}, 403, added_tags)
+            return (added_tags, 200, "OK")
+
         elif event == "AddTagToPost":
             tag_id = body["tag_id"]
             post_id = body["post_id"]
@@ -113,18 +125,6 @@ def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
             if isinstance(tagged_post, str):
                 return ({}, 403, tagged_post)
             return (tagged_post, 200, "OK")
-
-        elif event == "ConfirmOnePostCreation":
-            try:
-                tag_names = body["tags"]
-            except KeyError:
-                return {}, 200, "OK"
-            post_author = body["author_id"]
-            post_id = body["post_id"]
-            added_tags = add_tags_to_post(user_id, role, post_author, tag_names, post_id)
-            if isinstance(added_tags, str):
-                return ({}, 403, added_tags)
-            return (added_tags, 200, "OK")
 
         elif event == "RemoveTagFromPost":
             tag_id = body["tag_id"]
