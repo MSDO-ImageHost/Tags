@@ -43,6 +43,8 @@ class RabbitMQ:
 def callback(channel, method, properties, body) -> None:
     event = method.routing_key
     body = json.loads(body)
+    print("Received event:", event)
+    print("Body of message:", body)
     receive(event, body, properties)
 
 def send(event: str, data: Dict, status_code: int, message: str, correlation_id: str, content_type: str):
@@ -151,7 +153,7 @@ def handle_event(event: str, body: Dict, jwt: Dict, auth_needed: bool) -> Tuple:
             return (request_tags_for_post(body["post_id"]), 200, "OK")
         
         elif event == "RequestPostsForTag":
-            return (request_posts_for_tags(body["tag_id"]), 200, "OK")
+            return (request_posts_for_tag(body["tag_id"]), 200, "OK")
     
 
 def check_jwt(jwt_token: str):
@@ -166,7 +168,7 @@ def receive(event: str, body: Dict, properties: BasicProperties):
     responses = {
         "CreateTag": "ConfirmTagCreation",
         "UpdateTag": "ConfirmTagUpdate",
-        "DeleteTag": "ConfirmTagDeletion",
+        "DeleteTag": "ConfirmTagDelete",
         "AddTagToPost": "ConfirmAddedTag",
         "RemoveTagFromPost": "ConfirmTagRemoval",
         "RequestTag": "ReturnTag",

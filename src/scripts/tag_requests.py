@@ -47,7 +47,7 @@ def add_tag_to_post(user_id: int, role: int, post_author: int, tag_id: int, post
             "post_id": post_id
         }
 
-def add_tags_to_post(user_id: int, role: int, post_author: int, tag_names: List[str], post_id: str) -> Dict:
+def add_tags_to_post(user_id: int, role: int, post_author: int, tag_names: List[str], post_id: str) -> List:
     if role < 20:
         if user_id != post_author:
             return f"User does not own post with id [{post_id}]"
@@ -79,6 +79,6 @@ def request_tags_for_post(post_id: int) -> List:
     tagged_posts = TaggedPost.objects.filter(post_id=post_id)
     return [tp.tag.serialize() for tp in tagged_posts]
 
-def request_posts_for_tags(tag_id: int) -> List:
+def request_posts_for_tag(tag_id: int) -> List:
     tagged_posts = TaggedPost.objects.filter(tag__id=tag_id)
     return [{"post_id": tp.post_id} for tp in tagged_posts]
